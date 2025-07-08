@@ -138,7 +138,7 @@ def collect_data(index):
 def save_data_to_file(run_index, timeData, scaled):
     filename = os.path.join(SAVE_PATH, f"waveform_run{run_index}.txt")
     with open(filename, 'w') as f:
-        f.write("Time(s)\tCH1(V)\tCH2(V)\tCH3(V)\tCH4(V)\n")
+        f.write("Time(s)\tCH1\tCH2\tCH3\tCH4\n")
         for i in range(len(timeData)):
             f.write(f"{timeData[i]:.9e}\t" + "\t".join(f"{scaled[ch][i]:.6f}" for ch in range(4)) + "\n")
     print(f"Saved: {filename}")

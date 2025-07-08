@@ -11,7 +11,8 @@ import matplotlib.pyplot as plt
 ################################################
 #              DLL LOADING
 ################################################
-OBJdll = windll.LoadLibrary(r".\Dll\x64\HTHardDll.dll") # (64 bit)
+OBJdll = windll.LoadLibrary(r"C:\Users\zhoul\Desktop\Hantek scope\Hantek Python API\Dll\x64\HTHardDll.dll")
+#OBJdll = windll.LoadLibrary(r".\Dll\x64\HTHardDll.dll") # (64 bit)
 # OBJdll = windll.LoadLibrary(r".\Dll\x86\HTHardDll.dll") # (32 bit)
 
 ################################################

@@ -9,7 +9,8 @@ import numpy
 import matplotlib.pyplot as plt
 #https://docs.python.org/3/library/ctypes.html
 # load dll (cdll or windll)
-OBJdll = windll.LoadLibrary(r".\Dll\x64\HTHardDll.dll") # (64 bit)
+# OBJdll = windll.LoadLibrary(r".\Dll\x64\HTHardDll.dll") # (64 bit)
+OBJdll = windll.LoadLibrary(r"C:\Users\zhoul\Desktop\Hantek scope\Hantek Python API\Dll\x64\HTHardDll.dll")
 # OBJdll = windll.LoadLibrary(r".\Dll\x86\HTHardDll.dll") # (32 bit)
 
 class RELAYCONTROL(Structure):
@@ -52,28 +53,28 @@ WAVE_MODE = 0 #0=continuous wave, 1=single wave
 #OSCILLOSCOPE:
 PROBE_MULTIPLIER = 1 # 1 or 10 x probe
 ADC_CHANNEL_MODE = 1 #1, 2 or 4
-ENABLED_CHANNELS = [1, 0, 0, 0]
+ENABLED_CHANNELS = [1, 1, 1, 1]
 CHANNEL_COUPLING = 0 # DC=0, AC=1
 CHANS_MASK = 0x0F # 0x0F in hexadecimal notation means all 4 channels are open
 
 TRIGGER_CHANNEL = 0 #CH1=0, CH2=1, CH3=2, CH4=3
 TRIGGER_SLOPE = 0 # rising=0
-TRIGGER_MODE = 1 # edge=0
-TRIGGER_SWEEP = 0 # Auto trigger
+TRIGGER_MODE = 0 # edge=0
+TRIGGER_SWEEP = 1 # Auto trigger = 0, Normal trigger = 1
 TRIGGER_COUPLE = 0 # DC=0, AC=1
-TRIGGER_V = 0 # Trigger Voltage (vertical)
+TRIGGER_V = 200 # Trigger Voltage (vertical)
 
 #0=2nS, 1=5nS, 2=10nS, 3=20nS, 4=50nS, 5=100nS, 6=200nS, 7=500nS, 8=1uS, 9=2uS, 10=5uS, 11=10uS, 12=20uS, 13=50uS, 14=100uS, 15=200uS, 16=500uS 
 #17=1mS, 18=2mS, 19=5mS, 20=10mS, 21=20mS, 22=50mS, 23=100mS, 24=200mS, 25=500mS, 26=1S, 27=2S, 28=5S, 29=10S, 30=20S
 #31=50S, 32=100S, 33=200S, 34=500S, 35=1000S
-TIME_PER_DIVISION = 18
+TIME_PER_DIVISION = 19
 TIME_MULT = [2E-9, 5E-9, 1E-8, 2E-8, 5E-8, 1E-7, 2E-7, 5E-7, 1E-6, 2E-6, 5E-6, 1E-5, 2E-5, 5E-5, 1E-4, 2E-4, 5E-4, 1E-3, 2E-3, 5E-3, 1E-2, 2E-2, 5E-2, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]
 SAMPLING_RATE_SINGLE = [1E9, 1E9, 1E9, 1E9, 1E9, 1E9, 1E9, 500E6, 250E6, 125E6, 50E6, 25E6, 12.5E6, 5E6, 2.5E6, 1.25E6, 500E3, 250E3, 125E3, 50E3, 25E3, 12.5E3, 5E3, 2.5E3, 1.25E3, 500, 250, 125, 50, 25, 12.5, 5, 2.5, 1.25, 0.5, 0.25]
 SAMPLING_RATE_DUAL =   [500E6, 500E6, 500E6, 500E6, 500E6, 500E6, 500E6, 500E6, 250E6, 125E6, 50E6, 25E6, 12.5E6, 5E6, 2.5E6, 1.25E6, 500E3, 250E3, 125E3, 50E3, 25E3, 12.5E3, 5E3, 2.5E3, 1.25E3, 500, 250, 125, 50, 25, 12.5, 5, 2.5, 1.25, 0.5, 0.25]
 SAMPLING_RATE_QUAD =   [250E6, 250E6, 250E6, 250E6, 250E6, 250E6, 250E6, 250E6, 250E6, 125E6, 50E6, 25E6, 12.5E6, 5E6, 2.5E6, 1.25E6, 500E3, 250E3, 125E3, 50E3, 25E3, 12.5E3, 5E3, 2.5E3, 1.25E3, 500, 250, 125, 50, 25, 12.5, 5, 2.5, 1.25, 0.5, 0.25]
 
 #0=2mV, 1=5mV, 2=10mV, 3=20mV, 4=50mV, 5=100mV, 6=200mV, 7=500mV, 8=1V, 9=2V, 10=5V, 11=10V (w/ x1 probe)
-VOLTS_PER_DIVISION = 9
+VOLTS_PER_DIVISION = 8
 VOLT_MULT = [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10]
 VOLT_DIVISIONS = 8
 VOLT_RESOLUTION = 256 #8 bit ADC

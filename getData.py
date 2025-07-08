@@ -7,11 +7,14 @@ from ctypes import *
 import time
 import numpy
 import matplotlib.pyplot as plt
+from ctypes import WinDLL
+import os
 
 ################################################
 #              DLL LOADING
 ################################################
-OBJdll = windll.LoadLibrary(r"C:\Users\zhoul\Desktop\Hantek scope\Hantek Python API\Dll\x64\HTHardDll.dll")
+DLL_PATH = r"C:\Users\zhoul\Desktop\Hantek scope\Hantek Python API\Dll\x64\HTHardDll.dll"
+OBJdll = WinDLL(DLL_PATH)
 #OBJdll = windll.LoadLibrary(r".\Dll\x64\HTHardDll.dll") # (64 bit)
 # OBJdll = windll.LoadLibrary(r".\Dll\x86\HTHardDll.dll") # (32 bit)
 
@@ -50,19 +53,33 @@ class DATACONTROL(Structure):
 BUFFER_LEN = 4096
 SAVE_PATH = "./"
 SAMPLE_TIMES = 5
-
 # Define your sampling rate and voltage settings here
 #0=2nS, 1=5nS, 2=10nS, 3=20nS, 4=50nS, 5=100nS, 6=200nS, 7=500nS, 8=1uS, 9=2uS, 10=5uS, 11=10uS, 12=20uS, 13=50uS, 14=100uS, 15=200uS, 16=500uS 
 #17=1mS, 18=2mS, 19=5mS, 20=10mS, 21=20mS, 22=50mS, 23=100mS, 24=200mS, 25=500mS, 26=1S, 27=2S, 28=5S, 29=10S, 30=20S
 #31=50S, 32=100S, 33=200S, 34=500S, 35=1000S
-TIME_PER_DIVISION = 18
+TIME_PER_DIVISION = 19
+#0=2mV, 1=5mV, 2=10mV, 3=20mV, 4=50mV, 5=100mV, 6=200mV, 7=500mV, 8=1V, 9=2V, 10=5V, 11=10V (w/ x1 probe)
+VOLTS_PER_DIVISION = 8
+#OSCILLOSCOPE:
+PROBE_MULTIPLIER = 1 # 1 or 10 x probe
+ADC_CHANNEL_MODE = 1 #1, 2 or 4
+ENABLED_CHANNELS = [1, 1, 1, 1]
+CHANNEL_COUPLING = 0 # DC=0, AC=1
+CHANS_MASK = 0x0F # 0x0F in hexadecimal notation means all 4 channels are open
+
+TRIGGER_CHANNEL = 0 # CH1=0, CH2=1, CH3=2, CH4=3
+TRIGGER_SLOPE = 0 # rising=0
+TRIGGER_MODE = 0 # edge=0
+TRIGGER_SWEEP = 1 # Auto trigger = 0, Normal trigger =1
+TRIGGER_COUPLE = 0 # DC=0, AC=1
+TRIGGER_V = 200 # Trigger Voltage (vertical)
+
+
 TIME_MULT = [2E-9, 5E-9, 1E-8, 2E-8, 5E-8, 1E-7, 2E-7, 5E-7, 1E-6, 2E-6, 5E-6, 1E-5, 2E-5, 5E-5, 1E-4, 2E-4, 5E-4, 1E-3, 2E-3, 5E-3, 1E-2, 2E-2, 5E-2, 0.1, 0.2, 0.5, 1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]
 SAMPLING_RATE_SINGLE = [1E9, 1E9, 1E9, 1E9, 1E9, 1E9, 1E9, 500E6, 250E6, 125E6, 50E6, 25E6, 12.5E6, 5E6, 2.5E6, 1.25E6, 500E3, 250E3, 125E3, 50E3, 25E3, 12.5E3, 5E3, 2.5E3, 1.25E3, 500, 250, 125, 50, 25, 12.5, 5, 2.5, 1.25, 0.5, 0.25]
 SAMPLING_RATE_DUAL =   [500E6, 500E6, 500E6, 500E6, 500E6, 500E6, 500E6, 500E6, 250E6, 125E6, 50E6, 25E6, 12.5E6, 5E6, 2.5E6, 1.25E6, 500E3, 250E3, 125E3, 50E3, 25E3, 12.5E3, 5E3, 2.5E3, 1.25E3, 500, 250, 125, 50, 25, 12.5, 5, 2.5, 1.25, 0.5, 0.25]
 SAMPLING_RATE_QUAD =   [250E6, 250E6, 250E6, 250E6, 250E6, 250E6, 250E6, 250E6, 250E6, 125E6, 50E6, 25E6, 12.5E6, 5E6, 2.5E6, 1.25E6, 500E3, 250E3, 125E3, 50E3, 25E3, 12.5E3, 5E3, 2.5E3, 1.25E3, 500, 250, 125, 50, 25, 12.5, 5, 2.5, 1.25, 0.5, 0.25]
 
-#0=2mV, 1=5mV, 2=10mV, 3=20mV, 4=50mV, 5=100mV, 6=200mV, 7=500mV, 8=1V, 9=2V, 10=5V, 11=10V (w/ x1 probe)
-VOLTS_PER_DIVISION = 8
 VOLT_MULT = [0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10]
 VOLT_DIVISIONS = 8
 VOLT_RESOLUTION = 256 #8 bit ADC
@@ -80,386 +97,99 @@ OFFSET = 0 # mV
 WAVE_TYPE = 0 #0=sine, 1=ramp, 2=square, 4=DC, 8=noise
 WAVE_MODE = 0 #0=continuous wave, 1=single wave
 
-#OSCILLOSCOPE:
-PROBE_MULTIPLIER = 1 # 1 or 10 x probe
-ADC_CHANNEL_MODE = 1 #1, 2 or 4
-ENABLED_CHANNELS = [1, 0, 0, 0]
-CHANNEL_COUPLING = 0 # DC=0, AC=1
-CHANS_MASK = 0x0F # 0x0F in hexadecimal notation means all 4 channels are open
-
-TRIGGER_CHANNEL = 0 #CH1=0, CH2=1, CH3=2, CH4=3
-TRIGGER_SLOPE = 0 # rising=0
-TRIGGER_MODE = 1 # edge=0
-TRIGGER_SWEEP = 0 # Auto trigger
-TRIGGER_COUPLE = 0 # DC=0, AC=1
-TRIGGER_V = 0 # Trigger Voltage (vertical)
-
-YTFormat = 0 # YT Mode
-collect = 1
-nStartControl = 0
-nStartControl = nStartControl + (1 if TRIGGER_SWEEP == 0 else 0)
-nStartControl = nStartControl + (0 if YTFormat == 0 else 2)
-nStartControl = nStartControl + (0 if collect == 1 else 4)
-
-rcRelayControl = RELAYCONTROL()
-stDataControl = DATACONTROL()
-
-rcRelayControl.bCHEnable = (wintypes.BOOL * 4)(*ENABLED_CHANNELS)
-rcRelayControl.nCHVoltDIV = (wintypes.WORD * 4)(VOLTS_PER_DIVISION,VOLTS_PER_DIVISION,VOLTS_PER_DIVISION,VOLTS_PER_DIVISION)
-rcRelayControl.nCHCoupling = (wintypes.WORD * 4)(CHANNEL_COUPLING,CHANNEL_COUPLING,CHANNEL_COUPLING,CHANNEL_COUPLING) #Design coupling mode DC=0, AC=1
-rcRelayControl.bCHBWLimit = (wintypes.BOOL * 4)(0,0,0,0) #Whether to enable 20M filtering
-rcRelayControl.nTrigSource = TRIGGER_CHANNEL #Trigger source
-rcRelayControl.bTrigFilt = 0 #Whether to enable 20M filtering
-rcRelayControl.nALT = 0 #Whether to trigger alternately. Note that alternate triggering is a software function
-
-stDataControl.nCHSet = CHANS_MASK #0x0F (15) means all 4 channels are open
-stDataControl.nTimeDIV = TIME_PER_DIVISION # Time base index value
-stDataControl.nTriggerSource = TRIGGER_CHANNEL #Trigger source
-stDataControl.nHTriggerPos = 50 #horizontal trigger position
-stDataControl.nVTriggerPos = TRIGGER_V #Vertical trigger position
-stDataControl.nTriggerSlope = TRIGGER_SLOPE #Use the rising edge as the trigger method
-stDataControl.nBufferLen = 4096 # the length of the collected data
-stDataControl.nReadDataLen = 4096 # the length of the read data
-stDataControl.nAlreadyReadLen = 0 # the length that has been read, only used in scan scrolling
-stDataControl.nALT = 0 #Whether to trigger alternately. Note that alternate triggering is a software function
-
 ################################################
 #           DEVICE SETUP
 ################################################
+def get_device_index():
+    search = OBJdll.dsoHTSearchDevice
+    search.argtypes = [POINTER(wintypes.WORD)]
+    search.restype = wintypes.WORD
 
-print(" --------------------------------------------------------------------------------------------------")
+    devices = (wintypes.WORD * 32)()
+    if search(devices) == 0:
+        raise RuntimeError("No device found")
 
-def initialize_device():
-    #Find the currently connected device and get its index number
-    deviceArray = (wintypes.WORD * 32)()
-    deviceIndex = wintypes.WORD(99)
-    dsoHTSearchDevice = OBJdll.dsoHTSearchDevice
-    dsoHTSearchDevice.argtypes = [POINTER(wintypes.WORD)]
-    dsoHTSearchDevice.restype = wintypes.WORD
-    result = dsoHTSearchDevice(deviceArray)
-    if result == 0:
-        raise Exception("Device not found!")
+    for i, dev in enumerate(devices):
+        if dev:
+            return i
+    raise RuntimeError("Device index not found")
 
-    for i in range(32):
-        # print(i,'=',deviceArray[i])
-        if deviceArray[i]:
-            deviceIndex = i
-            break
-   
-    print("Found Device Index: ", deviceIndex)
-    #raise Exception("No available device index found!")
+def initialize_device(index):
+    init = OBJdll.dsoInitHard
+    init.argtypes = [wintypes.WORD]
+    init.restype = wintypes.WORD
+    if init(index) != 1:
+        raise RuntimeError("Device initialization failed")
 
-    dsoInitHard = OBJdll.dsoInitHard
-    dsoInitHard.argtypes = [wintypes.WORD]
-    dsoInitHard.restype = wintypes.WORD
-    result = dsoInitHard(deviceIndex)
-    print('dsoInitHard=',result)
-    return deviceIndex
-
-################################################
-#     INITIALIZE FUNCTION GENERATOR (DDS)
-################################################
-def configure_function_generator(deviceIndex):
-    """Configure the DDS function generator."""
-    print("\n[FUNCTION GENERATOR CONFIGURATION]")
-    OBJdll.ddsSetCmd(deviceIndex, WAVE_MODE)
-    OBJdll.ddsSDKSetWaveType(deviceIndex, WAVE_TYPE)
-    OBJdll.ddsSDKSetFre(deviceIndex, FREQUENCY)
-    OBJdll.ddsSDKSetAmp(deviceIndex, AMPLITUDE)
-    OBJdll.ddsSDKSetOffset(deviceIndex, OFFSET)
-    OBJdll.ddsSetOnOff(deviceIndex, 1)
-    print("Completed DDS Configuration")
-
-
-# ddsSetCmd = OBJdll.ddsSetCmd
-# ddsSetCmd.argtypes = [wintypes.WORD, wintypes.USHORT]
-# ddsSetCmd.restype = wintypes.ULONG
-# result = ddsSetCmd(deviceIndex, WAVE_MODE)
-# print('ddsSetCmd=',result)
-
-# ddsSDKSetWaveType = OBJdll.ddsSDKSetWaveType
-# ddsSDKSetWaveType.argtypes = [wintypes.WORD, wintypes.WORD]
-# ddsSDKSetWaveType.restype = wintypes.WORD
-# result = ddsSDKSetWaveType(deviceIndex, WAVE_TYPE)
-# print('ddsSDKSetWaveType=',result)
-
-# ddsSDKSetFre = OBJdll.ddsSDKSetFre
-# ddsSDKSetFre.argtypes = [wintypes.WORD, wintypes.FLOAT]
-# ddsSDKSetFre.restype = wintypes.FLOAT
-# result = ddsSDKSetFre(deviceIndex, FREQUENCY)
-# print('ddsSDKSetFre=',result)
-
-# ddsSDKSetAmp = OBJdll.ddsSDKSetAmp
-# ddsSDKSetAmp.argtypes = [wintypes.WORD, wintypes.WORD]
-# ddsSDKSetAmp.restype = wintypes.WORD
-# result = ddsSDKSetAmp(deviceIndex, AMPLITUDE)
-# print('ddsSDKSetAmp=',result)
-
-# ddsSDKSetOffset = OBJdll.ddsSDKSetOffset
-# ddsSDKSetOffset.argtypes = [wintypes.WORD, wintypes.SHORT]
-# ddsSDKSetOffset.restype = wintypes.SHORT
-# result = ddsSDKSetOffset(deviceIndex, OFFSET)
-# print('ddsSDKSetOffset=',result)
-
-# ddsSetOnOff = OBJdll.ddsSetOnOff
-# ddsSetOnOff.argtypes = [wintypes.WORD, wintypes.SHORT]
-# ddsSetOnOff.restype = wintypes.ULONG
-# result = ddsSetOnOff(deviceIndex, 1)
-# print('ddsSetOnOff=',result)
-
-# print("Completed DDS Configuration")
-
-################################################
-#         INITIALIZE OSCILLOSCOPE (DSO)
-################################################
-def configure_oscilloscope(deviceIndex, rcRelayControl, stDataControl):
-    """Configure the oscilloscope settings."""
-    print("\n[OSCILLOSCOPE CONFIGURATION]")
-    OBJdll.dsoHTADCCHModGain(deviceIndex, 4)
-    OBJdll.dsoHTSetSampleRate(deviceIndex, YTFormat, rcRelayControl, stDataControl)
-    OBJdll.dsoHTSetCHAndTrigger(deviceIndex, rcRelayControl, stDataControl.nTimeDIV)
-    OBJdll.dsoHTSetRamAndTrigerControl(deviceIndex, stDataControl.nTimeDIV, stDataControl.nCHSet, stDataControl.nTriggerSource, 0)
-
+def configure_scope(index, rc, dc):
+    OBJdll.dsoHTSetSampleRate(index, 0, byref(rc), byref(dc))
+    OBJdll.dsoHTSetCHAndTrigger(index, byref(rc), dc.nTimeDIV)
+    OBJdll.dsoHTSetRamAndTrigerControl(index, dc.nTimeDIV, dc.nCHSet, dc.nTriggerSource, 0)
     for i in range(4):
-        OBJdll.dsoHTSetCHPos(deviceIndex, rcRelayControl.nCHVoltDIV[i], CH_ZERO_POS[i], i, ADC_CHANNEL_MODE)
-        print(f"Set CH{i+1} Vertical Position: {rcRelayControl.nCHVoltDIV[i]}")
+        OBJdll.dsoHTSetCHPos(index, rc.nCHVoltDIV[i], CH_ZERO_POS[i], i, 1)
+    OBJdll.dsoHTSetVTriggerLevel(index, dc.nVTriggerPos, 4)
+    OBJdll.dsoHTSetTrigerMode(index, TRIGGER_MODE, dc.nTriggerSlope, 0)
 
-    OBJdll.dsoHTSetVTriggerLevel(deviceIndex, stDataControl.nVTriggerPos, 4)
-    OBJdll.dsoHTSetTrigerMode(deviceIndex, TRIGGER_MODE, stDataControl.nTriggerSlope, 0)
-    print("Completed Oscilloscope Configuration")
-
-
-# dsoHTADCCHModGain = OBJdll.dsoHTADCCHModGain
-# dsoHTADCCHModGain.argtypes = [wintypes.WORD, wintypes.WORD]
-# dsoHTADCCHModGain.restype = wintypes.WORD
-# result = dsoHTADCCHModGain(deviceIndex, 4) #Set the analog amplitude correction
-# print('dsoHTADCCHModGain=',result)
-
-# dsoHTSetSampleRate = OBJdll.dsoHTSetSampleRate
-# dsoHTSetSampleRate.argtypes = [wintypes.WORD, wintypes.WORD, POINTER(RELAYCONTROL), POINTER(DATACONTROL)]
-# dsoHTSetSampleRate.restype = wintypes.WORD
-# result = dsoHTSetSampleRate(deviceIndex, YTFormat, rcRelayControl, stDataControl) #Set the sample rate
-# print('dsoHTSetSampleRate=',result)
-
-# dsoHTSetCHAndTrigger = OBJdll.dsoHTSetCHAndTrigger
-# dsoHTSetCHAndTrigger.argtypes = [wintypes.WORD, POINTER(RELAYCONTROL), wintypes.WORD]
-# dsoHTSetCHAndTrigger.restype = wintypes.WORD
-# result = dsoHTSetCHAndTrigger(deviceIndex, rcRelayControl, stDataControl.nTimeDIV) #Set the channel switch and voltage level
-# print('dsoHTSetCHAndTrigger=',result)
-
-# dsoHTSetRamAndTrigerControl = OBJdll.dsoHTSetRamAndTrigerControl
-# dsoHTSetRamAndTrigerControl.argtypes = [wintypes.WORD, wintypes.WORD, wintypes.WORD, wintypes.WORD, wintypes.WORD]
-# dsoHTSetRamAndTrigerControl.restype = wintypes.WORD
-# result = dsoHTSetRamAndTrigerControl(deviceIndex, stDataControl.nTimeDIV, stDataControl.nCHSet, stDataControl.nTriggerSource, 0) #Set the trigger source
-# print('dsoHTSetRamAndTrigerControl=',result)
-
-# for i in range(4):
-#     dsoHTSetCHPos = OBJdll.dsoHTSetCHPos
-#     dsoHTSetCHPos.argtypes = [wintypes.WORD, wintypes.WORD, wintypes.WORD, wintypes.WORD, wintypes.WORD]
-#     dsoHTSetCHPos.restype = wintypes.WORD
-#     result = dsoHTSetCHPos(deviceIndex, rcRelayControl.nCHVoltDIV[i], CH_ZERO_POS[i], i, ADC_CHANNEL_MODE) #Set the vertical position of the channel
-#     print('rcRelayControl.nCHVoltDIV[i]=', rcRelayControl.nCHVoltDIV[i])
-#     print('dsoHTSetCHPos=',result, ' CH', i+1)
-
-# dsoHTSetVTriggerLevel = OBJdll.dsoHTSetVTriggerLevel
-# dsoHTSetVTriggerLevel.argtypes = [wintypes.WORD, wintypes.WORD, wintypes.WORD]
-# dsoHTSetVTriggerLevel.restype = wintypes.WORD
-# result = dsoHTSetVTriggerLevel(deviceIndex, stDataControl.nVTriggerPos, 4) #Set the trigger vertical position to be the same as channel 1
-# print('dsoHTSetVTriggerLevel=',result)
-
-# dsoHTSetTrigerMode = OBJdll.dsoHTSetTrigerMode
-# dsoHTSetTrigerMode.argtypes = [wintypes.WORD, wintypes.WORD, wintypes.WORD, wintypes.WORD]
-# dsoHTSetTrigerMode.restype = wintypes.WORD
-# result = dsoHTSetTrigerMode(deviceIndex, TRIGGER_MODE, stDataControl.nTriggerSlope, 0)
-# print('dsoHTSetTrigerMode=',result)
-
-def setup_device(rcRelayControl, stDataControl):
-    """Full device setup pipeline."""
-    deviceIndex = initialize_device()
-    configure_function_generator(deviceIndex)
-    configure_oscilloscope(deviceIndex, rcRelayControl, stDataControl)
-    return deviceIndex
-
-################################################
-#                 COLLECT DATA
-################################################
-def start_data_collection(deviceIndex, rcRelayControl, stDataControl):
-    dsoHTStartCollectData = OBJdll.dsoHTStartCollectData
-    dsoHTStartCollectData.argtypes = [wintypes.WORD, wintypes.WORD]
-    dsoHTStartCollectData.restype = wintypes.WORD
-    nStartControl = 1
-    dsoHTStartCollectData(deviceIndex, nStartControl)
-
-    dsoHTGetState = OBJdll.dsoHTGetState
-    dsoHTGetState.argtypes = [wintypes.WORD]
-    dsoHTGetState.restype = wintypes.WORD
-
-    while (dsoHTGetState(deviceIndex) & 2) == 0:
+def collect_data(index):
+    OBJdll.dsoHTStartCollectData(index, 1)
+    while (OBJdll.dsoHTGetState(index) & 2) == 0:
         time.sleep(0.001)
-    print("Data is ready to read, READING DATA")
 
-# dsoHTStartCollectData = OBJdll.dsoHTStartCollectData
-# dsoHTStartCollectData.argtypes = [wintypes.WORD, wintypes.WORD]
-# dsoHTStartCollectData.restype = wintypes.WORD
-# result = dsoHTStartCollectData(deviceIndex, nStartControl)
-# print('dsoHTStartCollectData=',result)
+def save_data_to_file(run_index, timeData, scaled):
+    filename = os.path.join(SAVE_PATH, f"waveform_run{run_index}.txt")
+    with open(filename, 'w') as f:
+        f.write("Time(s)\tCH1(V)\tCH2(V)\tCH3(V)\tCH4(V)\n")
+        for i in range(len(timeData)):
+            f.write(f"{timeData[i]:.9e}\t" + "\t".join(f"{scaled[ch][i]:.6f}" for ch in range(4)) + "\n")
+    print(f"Saved: {filename}")
 
-# print("Waiting for measurement to complete")
-# dsoHTGetState = OBJdll.dsoHTGetState
-# dsoHTGetState.argtypes = [wintypes.WORD]
-# dsoHTGetState.restype = wintypes.WORD
-# while (dsoHTGetState(deviceIndex) & 2) == 0:
-#     time.sleep(0.001) #wait 1 mS
-# print("Data is ready to read, READING DATA")
+def read_and_save(index, dc, run_index):
+    CH = [(wintypes.WORD * BUFFER_LEN)() for _ in range(4)]
+    OBJdll.dsoHTGetData(index, *map(byref, CH), byref(dc))
 
-################################################
-#                 READ DATA
-################################################
-def read_data(deviceIndex, stDataControl):
-    CH1ReadData = (wintypes.WORD * BUFFER_LEN)()
-    CH2ReadData = (wintypes.WORD * BUFFER_LEN)()
-    CH3ReadData = (wintypes.WORD * BUFFER_LEN)()
-    CH4ReadData = (wintypes.WORD * BUFFER_LEN)()
+    fs = SAMPLING_RATE_SINGLE[TIME_PER_DIVISION]
+    timeData = [i / fs for i in range(BUFFER_LEN)]
+    scaled = [[] for _ in range(4)]
 
-    dsoHTGetData = OBJdll.dsoHTGetData
-    dsoHTGetData.argtypes = [wintypes.WORD, POINTER(wintypes.WORD), POINTER(wintypes.WORD), POINTER(wintypes.WORD), POINTER(wintypes.WORD), POINTER(DATACONTROL)]
-    dsoHTGetData.restype = wintypes.WORD
-    result = dsoHTGetData(deviceIndex, CH1ReadData, CH2ReadData, CH3ReadData, CH4ReadData, stDataControl)
-
-    if result != 1:
-        raise Exception("Data read failed!")
-
-    return CH1ReadData, CH2ReadData, CH3ReadData, CH4ReadData
-
-# CH1ReadData = (wintypes.WORD * 4096)() # the () initializes the array
-# CH2ReadData = (wintypes.WORD * 4096)()
-# CH3ReadData = (wintypes.WORD * 4096)()
-# CH4ReadData = (wintypes.WORD * 4096)()
-
-# # NOTE: ffi_prep_cif failed ERROR happens when you don't include argtypes and restype
-# dsoHTGetData = OBJdll.dsoHTGetData
-# dsoHTGetData.argtypes = [wintypes.WORD, POINTER(wintypes.WORD), POINTER(wintypes.WORD), POINTER(wintypes.WORD), POINTER(wintypes.WORD), POINTER(DATACONTROL)]
-# dsoHTGetData.restype = wintypes.WORD
-# result = dsoHTGetData(deviceIndex, CH1ReadData, CH2ReadData, CH3ReadData, CH4ReadData, stDataControl)
-# print('dsoHTGetData result=',result)
-
-def process_data(CH1, CH2, CH3, CH4):
-    timeData = []
-    CH1SrcData = []
-    CH2SrcData = []
-    CH3SrcData = []
-    CH4SrcData = []
-
-    curSampleRate = SAMPLING_RATE_SINGLE[TIME_PER_DIVISION]
     for i in range(BUFFER_LEN):
-        timeData.append(i / curSampleRate)
-        CH1SrcData.append((CH1[i] - (255 - CH_ZERO_POS[0])) * PROBE_MULTIPLIER * VOLT_MULT[VOLTS_PER_DIVISION] * VOLT_DIVISIONS / 256)
-        CH2SrcData.append((CH2[i] - (255 - CH_ZERO_POS[1])) * PROBE_MULTIPLIER * VOLT_MULT[VOLTS_PER_DIVISION] * VOLT_DIVISIONS / 256)
-        CH3SrcData.append((CH3[i] - (255 - CH_ZERO_POS[2])) * PROBE_MULTIPLIER * VOLT_MULT[VOLTS_PER_DIVISION] * VOLT_DIVISIONS / 256)
-        CH4SrcData.append((CH4[i] - (255 - CH_ZERO_POS[3])) * PROBE_MULTIPLIER * VOLT_MULT[VOLTS_PER_DIVISION] * VOLT_DIVISIONS / 256)
+        for ch in range(4):
+            raw = CH[ch][i] - (255 - CH_ZERO_POS[ch])
+            scaled[ch].append(raw * PROBE_MULTIPLIER * VOLT_MULT[VOLTS_PER_DIVISION] * VOLT_DIVISIONS / 256)
 
-    return timeData, CH1SrcData, CH2SrcData, CH3SrcData, CH4SrcData
+    save_data_to_file(run_index, timeData, scaled)
 
-# timeData = []
-# CH1SrcData = []
-# CH2SrcData = []
-# CH3SrcData = []
-# CH4SrcData = []
-# if result == 1:
-#     for i in range(stDataControl.nReadDataLen):
-#         # Calculate Time Points
-#         if(ADC_CHANNEL_MODE == 1):
-#             curSampleRate = SAMPLING_RATE_SINGLE[TIME_PER_DIVISION]
-#         elif(ADC_CHANNEL_MODE == 2):
-#             curSampleRate = SAMPLING_RATE_DUAL[TIME_PER_DIVISION]
-#         elif(ADC_CHANNEL_MODE == 4):
-#             curSampleRate = SAMPLING_RATE_QUAD[TIME_PER_DIVISION]
-#         else:
-#             print('ADC_CHANNEL_MODE can only be 1, 2 or 4, aborting.')
-#         timeData.append(i / curSampleRate)
-#         CH1SrcData.append((CH1ReadData[i] - (255 - CH_ZERO_POS[0])) * PROBE_MULTIPLIER * VOLT_MULT[VOLTS_PER_DIVISION] * VOLT_DIVISIONS / 256)
-#         CH2SrcData.append((CH2ReadData[i] - (255 - CH_ZERO_POS[1])) * PROBE_MULTIPLIER * VOLT_MULT[VOLTS_PER_DIVISION] * VOLT_DIVISIONS / 256)
-#         CH3SrcData.append((CH3ReadData[i] - (255 - CH_ZERO_POS[2])) * PROBE_MULTIPLIER * VOLT_MULT[VOLTS_PER_DIVISION] * VOLT_DIVISIONS / 256)
-#         CH4SrcData.append((CH4ReadData[i] - (255 - CH_ZERO_POS[3])) * PROBE_MULTIPLIER * VOLT_MULT[VOLTS_PER_DIVISION] * VOLT_DIVISIONS / 256)
-# else:
-#     print('READ FAILED')
-
-def save_data(filename, timeData, CH1SrcData, CH2SrcData, CH3SrcData, CH4SrcData):
-    with open(filename, "w") as file:
-        file.write("Time(s)\tCH1(V)\tCH2(V)\tCH3(V)\tCH4(V)\n")
-        for t, ch1, ch2, ch3, ch4 in zip(timeData, CH1SrcData, CH2SrcData, CH3SrcData, CH4SrcData):
-            file.write(f"{t:.10e}\t{ch1:.6f}\t{ch2:.6f}\t{ch3:.6f}\t{ch4:.6f}\n")
-    print(f"Data saved to {filename}")
-
-def plot_data(timeData, CH1SrcData, CH2SrcData, CH3SrcData, CH4SrcData):
-    fig, ax = plt.subplots()
-    ax.set(xlabel='time (s)', ylabel='voltage (V)', title='WAVEFORM')
-    ax.plot(timeData, CH1SrcData, "-g", label="CH1")
-    ax.plot(timeData, CH2SrcData, "-b", label="CH2")
-    ax.plot(timeData, CH3SrcData, "-r", label="CH3")
-    ax.plot(timeData, CH4SrcData, "-y", label="CH4")
-    ax.grid()
-    plt.legend(loc="upper left")
-    plt.xlim([0, timeData[-1]])
-    verticalHeight = VOLT_MULT[VOLTS_PER_DIVISION] * VOLT_DIVISIONS / 2
-    plt.ylim([-verticalHeight, verticalHeight])
-    plt.show()
-
-# # Use MatPlotLib to plot the waveforms 
-# fig, ax = plt.subplots()
-
-# ax.set(xlabel='time (S)', ylabel='voltage (V)', title='WAVEFORM')
-
-# ax.plot(timeData, CH1SrcData, "-g", label="CH1")
-# ax.plot(timeData, CH2SrcData, "-b", label="CH2")
-# ax.plot(timeData, CH3SrcData, "-r", label="CH3")
-# ax.plot(timeData, CH4SrcData, "-y", label="CH4")
-
-# ax.grid()
-# plt.legend(loc="upper left")
-# plt.xlim([0, timeData[4095]]) #Note, in the official software I believe the windows shows 2500 sample (time) points
-# verticalHeight = VOLT_MULT[VOLTS_PER_DIVISION] * VOLT_DIVISIONS / 2
-# plt.ylim([-verticalHeight, verticalHeight])
-# plt.show()
-
-# print("COMPLETED!")
-################################################
-#              MAIN WORKFLOW
-################################################
 def main():
-    rcRelayControl = RELAYCONTROL()
-    rcRelayControl.bCHEnable = (wintypes.BOOL * 4)(1, 1, 1, 1)
-    rcRelayControl.nCHVoltDIV = (wintypes.WORD * 4)(VOLTS_PER_DIVISION, VOLTS_PER_DIVISION, VOLTS_PER_DIVISION, VOLTS_PER_DIVISION)
-    rcRelayControl.nCHCoupling = (wintypes.WORD * 4)(0, 0, 0, 0)
-    rcRelayControl.bCHBWLimit = (wintypes.BOOL * 4)(0, 0, 0, 0)
-    rcRelayControl.nTrigSource = 0
-    rcRelayControl.bTrigFilt = 0
-    rcRelayControl.nALT = 0
+    rc = RELAYCONTROL(
+        bCHEnable=(wintypes.BOOL * 4)(1, 1, 1, 1),
+        nCHVoltDIV=(wintypes.WORD * 4)(*([VOLTS_PER_DIVISION] * 4)),
+        nCHCoupling=(wintypes.WORD * 4)(0, 0, 0, 0),
+        bCHBWLimit=(wintypes.BOOL * 4)(0, 0, 0, 0),
+        nTrigSource=TRIGGER_CHANNEL,
+        bTrigFilt=0,
+        nALT=0
+    )
 
-    stDataControl = DATACONTROL()
-    stDataControl.nCHSet = 0x0F
-    stDataControl.nTimeDIV = TIME_PER_DIVISION
-    stDataControl.nTriggerSource = 0
-    stDataControl.nHTriggerPos = 50
-    stDataControl.nVTriggerPos = 0
-    stDataControl.nTriggerSlope = 0
-    stDataControl.nBufferLen = BUFFER_LEN
-    stDataControl.nReadDataLen = BUFFER_LEN
-    stDataControl.nAlreadyReadLen = 0
-    stDataControl.nALT = 0
+    dc = DATACONTROL(
+        nCHSet=0x0F,
+        nTimeDIV=TIME_PER_DIVISION,
+        nTriggerSource=TRIGGER_CHANNEL,
+        nHTriggerPos=50,
+        nVTriggerPos=TRIGGER_V,
+        nTriggerSlope=TRIGGER_SLOPE,
+        nBufferLen=BUFFER_LEN,
+        nReadDataLen=BUFFER_LEN,
+        nAlreadyReadLen=0,
+        nALT=0
+    )
 
-    # Call unified setup
-    deviceIndex = setup_device(rcRelayControl, stDataControl)
+    idx = get_device_index()
+    initialize_device(idx)
+    configure_scope(idx, rc, dc)
 
     for run in range(1, SAMPLE_TIMES + 1):
-        print(f"\n=== Run {run} ===")
-        start_data_collection(deviceIndex, rcRelayControl, stDataControl)
-        CH1, CH2, CH3, CH4 = read_data(deviceIndex, stDataControl)
-        timeData, CH1SrcData, CH2SrcData, CH3SrcData, CH4SrcData = process_data(CH1, CH2, CH3, CH4)
-
-        filename = f"{SAVE_PATH}oscilloscope_data_run{run}.txt"
-        save_data(filename, timeData, CH1SrcData, CH2SrcData, CH3SrcData, CH4SrcData)
-        plot_data(timeData, CH1SrcData, CH2SrcData, CH3SrcData, CH4SrcData)
+        print(f"\n--- Capturing Run {run} ---")
+        collect_data(idx)
+        read_and_save(idx, dc, run)
 
 if __name__ == "__main__":
     main()

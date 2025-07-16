@@ -51,7 +51,7 @@ for ch in CHANNELS:
     print(f"\n=== {ch} pulse durations ===")
     for i, d in enumerate(dur,1):
         print(f" Pulse #{i}: {d*1e6:6.2f} µs")
-    #print(f" → mean = {dur.mean()*1e6:6.2f} µs ± {dur.std()*1e6:6.2f} µs")
+    print(f" → mean = {dur.mean()*1e6:6.2f} µs ± {dur.std()*1e6:6.2f} µs")
 
 # === 4) EDGE‑TIME JITTER ACROSS RUNS ===
 jitter = {}
@@ -86,9 +86,9 @@ for ch in CHANNELS:
     }
 
     # print
-    print(f"\n=== {ch} edge-time jitter ===")
+    print(f"\n=== {ch} edge‑time jitter ===")
     for i,(rm, rs, fm, fs) in enumerate(zip(r_mean, r_std, f_mean, f_std),1):
-        print(f" Pulse #{i}: rising-σ = {rs*1e6:6.2f} µs,  falling-σ = {fs*1e6:6.2f} µs")
+        print(f" Pulse #{i}: rising‑σ = {rs*1e6:6.2f} µs,  falling‑σ = {fs*1e6:6.2f} µs")
 
 # === 5) PLOT EVERYTHING ===
 plt.figure(figsize=(12,6))
@@ -98,14 +98,14 @@ for ch in CHANNELS:
     for run in range(NUM_RUNS):
         plt.plot(time, stacked[ch][run],
                  color=COLORS[ch], alpha=0.3,
-                 label=f"{ch} Run {run+1}" if run==0 else None)
+                 label=f"{ch} Run" if run==0 else "")
     plt.plot(time, mean_vals[ch],
              color=COLORS[ch], lw=2, label=f"{ch} Mean")
-    # plt.fill_between(time,
-    #                  mean_vals[ch]-std_vals[ch],
-    #                  mean_vals[ch]+std_vals[ch],
-    #                  color=COLORS[ch], alpha=0.2,
-    #                  label=f"{ch} ±1 Std V")
+    plt.fill_between(time,
+                     mean_vals[ch]-std_vals[ch],
+                     mean_vals[ch]+std_vals[ch],
+                     color=COLORS[ch], alpha=0.2,
+                     label=f"{ch} ±1 Std V")
 
 # b) horizontal shading for edge‑time jitter
 for ch in CHANNELS:
@@ -116,11 +116,11 @@ for ch in CHANNELS:
         # rising edge jitter
         plt.axvspan(rm-rs, rm+rs, ymin=0, ymax=1,
                     color=col, alpha=0.15,
-                    label=f"{ch} rising ±1σ" if i==0 else "")
+                    label=f"{ch} rising ±1σ" if i==0 else "")
         # falling edge jitter
         plt.axvspan(fm-fs, fm+fs, ymin=0, ymax=1,
                     color=col, alpha=0.15,
-                    label=f"{ch} falling ±1σ" if i==0 else "")
+                    label=f"{ch} falling ±1σ" if i==0 else "")
         # # mark the mean edge times
         # plt.axvline(rm, color=col, ls='--', lw=1)
         # plt.axvline(fm, color=col, ls='--', lw=1)

@@ -13,7 +13,7 @@ os.makedirs(SAVE_FOLDER, exist_ok=True)
 
 # ── CONSTANTS ──────────────────────────────────────────────────────────────────
 BUFFER_LEN         = 4096
-RUN_COUNT          = 5
+RUN_COUNT          = 10
 # Define your sampling rate and voltage settings here
 #0=2nS, 1=5nS, 2=10nS, 3=20nS, 4=50nS, 5=100nS, 6=200nS, 7=500nS, 8=1uS, 9=2uS, 10=5uS, 11=10uS, 12=20uS, 13=50uS, 14=100uS, 15=200uS, 16=500uS 
 #17=1mS, 18=2mS, 19=5mS, 20=10mS, 21=20mS, 22=50mS, 23=100mS, 24=200mS, 25=500mS, 26=1S, 27=2S, 28=5S, 29=10S, 30=20S

@@ -8,7 +8,7 @@ import matplotlib.patches as mpatches
 # === CONFIG ===
 SAVE_PATH = r"C:\Users\zhoul\Desktop\Hantek scope\Hantek Python API\python code"
 SAVE_PATH = os.path.join(SAVE_PATH, "pico_I2C(100kHz)")
-NUM_RUNS  = 5
+NUM_RUNS  = 10
 CHANNELS  = ['CH1', 'CH4']
 COLORS    = {'CH1': 'blue', 'CH4': 'green'}
 

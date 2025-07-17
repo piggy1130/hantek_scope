@@ -8,7 +8,7 @@ DLL_PATH = r"C:\Users\zhoul\Desktop\Hantek scope\Hantek Python API\Dll\x64\HTHar
 _scope   = windll.LoadLibrary(DLL_PATH)
 
 # ── OUTPUT FOLDER ──────────────────────────────────────────────────────────────
-SAVE_FOLDER = os.path.join(os.getcwd(), "pico_I2C(100kHz)")
+SAVE_FOLDER = os.path.join(os.getcwd(), "pico_I2C(400kHz)")
 os.makedirs(SAVE_FOLDER, exist_ok=True)
 
 # ── CONSTANTS ──────────────────────────────────────────────────────────────────
@@ -18,7 +18,7 @@ RUN_COUNT          = 10
 #0=2nS, 1=5nS, 2=10nS, 3=20nS, 4=50nS, 5=100nS, 6=200nS, 7=500nS, 8=1uS, 9=2uS, 10=5uS, 11=10uS, 12=20uS, 13=50uS, 14=100uS, 15=200uS, 16=500uS 
 #17=1mS, 18=2mS, 19=5mS, 20=10mS, 21=20mS, 22=50mS, 23=100mS, 24=200mS, 25=500mS, 26=1S, 27=2S, 28=5S, 29=10S, 30=20S
 #31=50S, 32=100S, 33=200S, 34=500S, 35=1000S
-TIME_PER_DIVISION  = 15
+TIME_PER_DIVISION  = 14
 #0=2mV, 1=5mV, 2=10mV, 3=20mV, 4=50mV, 5=100mV, 6=200mV, 7=500mV, 8=1V, 9=2V, 10=5V, 11=10V (w/ x1 probe)
 VOLTS_PER_DIVISION = 8
 PROBE_MULTIPLIER   = 1

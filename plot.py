@@ -7,7 +7,7 @@ import matplotlib.patches as mpatches
 
 # === CONFIG ===
 SAVE_PATH = r"C:\Users\zhoul\Desktop\Hantek scope\Hantek Python API\python code"
-SAVE_PATH = os.path.join(SAVE_PATH, "pico_I2C(100kHz)")
+SAVE_PATH = os.path.join(SAVE_PATH, "pico_I2C(400kHz)")
 NUM_RUNS  = 10
 CHANNELS  = ['CH1', 'CH4']
 COLORS    = {'CH1': 'blue', 'CH4': 'green'}
@@ -126,7 +126,7 @@ for ch in CHANNELS:
 #         # plt.axvline(fm, color=col, ls='--', lw=1)
 
 # tidy up
-plt.title("Channel 1 & 4: Pulse Durations + Edge-Time Jitter with 100kHz I2C")
+plt.title("Channel 1 & 4: Pulse Durations + Edge-Time Jitter with 400kHz I2C")
 plt.xlabel("Time (s)")
 plt.ylabel("Voltage (V)")
 plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=20))

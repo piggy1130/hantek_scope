@@ -107,26 +107,26 @@ for ch in CHANNELS:
     #                  color=COLORS[ch], alpha=0.2,
     #                  label=f"{ch} ±1 Std V")
 
-# b) horizontal shading for edge‑time jitter
-for ch in CHANNELS:
-    col = COLORS[ch]
-    jm = jitter[ch]
-    for i, (rm, rs, fm, fs) in enumerate(zip(jm['r_mean'], jm['r_std'],
-                                           jm['f_mean'], jm['f_std'])):
-        # rising edge jitter
-        plt.axvspan(rm-rs, rm+rs, ymin=0, ymax=1,
-                    color=col, alpha=0.15,
-                    label=f"{ch} rising ±1σ" if i==0 else "")
-        # falling edge jitter
-        plt.axvspan(fm-fs, fm+fs, ymin=0, ymax=1,
-                    color=col, alpha=0.15,
-                    label=f"{ch} falling ±1σ" if i==0 else "")
-        # # mark the mean edge times
-        # plt.axvline(rm, color=col, ls='--', lw=1)
-        # plt.axvline(fm, color=col, ls='--', lw=1)
+# # b) horizontal shading for edge‑time jitter
+# for ch in CHANNELS:
+#     col = COLORS[ch]
+#     jm = jitter[ch]
+#     for i, (rm, rs, fm, fs) in enumerate(zip(jm['r_mean'], jm['r_std'],
+#                                            jm['f_mean'], jm['f_std'])):
+#         # rising edge jitter
+#         plt.axvspan(rm-rs, rm+rs, ymin=0, ymax=1,
+#                     color=col, alpha=0.15,
+#                     label=f"{ch} rising ±1σ" if i==0 else "")
+#         # falling edge jitter
+#         plt.axvspan(fm-fs, fm+fs, ymin=0, ymax=1,
+#                     color=col, alpha=0.15,
+#                     label=f"{ch} falling ±1σ" if i==0 else "")
+#         # # mark the mean edge times
+#         # plt.axvline(rm, color=col, ls='--', lw=1)
+#         # plt.axvline(fm, color=col, ls='--', lw=1)
 
 # tidy up
-plt.title("Channel 1 & 4: Pulse Durations + Edge-Time Jitter")
+plt.title("Channel 1 & 4: Pulse Durations + Edge-Time Jitter with 100kHz I2C")
 plt.xlabel("Time (s)")
 plt.ylabel("Voltage (V)")
 plt.gca().xaxis.set_major_locator(MaxNLocator(nbins=20))
